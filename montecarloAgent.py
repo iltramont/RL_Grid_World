@@ -28,7 +28,7 @@ class MontecarloAgent:
         return np.full(matrix_dimension, 0.0, dtype=float)
 
     def get_greedy_action(self, state: (int, int)) -> (int, int):
-        action_index: int = np.argmax(self.q_value_table[state])
+        action_index: int = self.q_value_table[state].argmax()
         return self.actions[action_index]
 
     def get_epsilon_greedy_action(self, state: (int, int)) -> (int, int):
@@ -56,7 +56,7 @@ class MontecarloAgent:
         :param episode: A list of (state, action, reward) tuples
         """
         visited_state_actions = set()
-        rewards: list[int] = [x[2] for x in episode]
+        # rewards: list[int] = [x[2] for x in episode]
         g = 0    # Total return
         # Process the episode in reverse to calculate returns efficiently
         for i in reversed(range(len(episode))):
