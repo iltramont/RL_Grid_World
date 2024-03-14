@@ -1,16 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-# import matplotlib.colors as mcolors
-# import pdb
-# import time
-# from IPython.display import clear_output
 
 
 class ValidStateException(Exception):
     pass
 
 
-class GirdWorldEnvironment:
+class GridWorldEnvironment:
     def __init__(self, size: (int, int), obstacles: tuple[(int, int)], position: (int, int), target: (int, int),
                  actions: tuple[(int, int)] = ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)),
                  rewards: tuple[int] = (0, -5, -1),
@@ -24,6 +20,7 @@ class GirdWorldEnvironment:
         :param target: target position.
         :param actions: possible actions to be taken by the robot.
         :param rewards: actions' rewards.
+        :param malfunction_probability: probability to not do the desired action.
         """
         self.size = size
         self.obstacles = obstacles  # for plotting purposes
@@ -71,13 +68,13 @@ class GirdWorldEnvironment:
             return action_input
         else:
             clockwise: bool = np.random.randint(0, 2) == 0
-            return GirdWorldEnvironment.rotate_action(action_input, clockwise)
+            return GridWorldEnvironment.rotate_action(action_input, clockwise)
 
     # this should be modified if we introduce malfunctioning actuator
     def get_next_state(self, current_state: (int, int), action: (int, int)) -> (int, int):
         malfunction: bool = np.random.random() < self.malfunction_probability
         if malfunction:
-            action = self.malfunction_action(action)
+            action = GridWorldEnvironment.malfunction_action(action)
         possible_next_state = (current_state[0] + action[0], current_state[1] + action[1])
         if self.is_valid_state(possible_next_state) and current_state != self.target:
             next_state = possible_next_state
@@ -85,28 +82,6 @@ class GirdWorldEnvironment:
             next_state = current_state
         return next_state
 
-    def environment_dynamics(self, s_prime: (int, int), r: int, s: (int, int), a: (int, int)) -> float:
-        # Case 1: invalid state
-        if not self.is_valid_state(s_prime):
-            return 0
-        # Case 2: not corresponding reward
-        elif self.get_reward(s, a, s_prime) != r:
-            return 0
-        # Case 3: action is (0, 0)
-        elif a == (0, 0):
-            if s_prime == s:
-                return 1
-            else:
-                return 0
-        # Case 4 robot moves
-        else:
-            if s_prime != (s[0] + a[0], s[1] + a[1]):
-
-
-
-        # Case 4 state is valid and reward corresponds
-        else:
-            if s_prime == (s[0] + action[0])
     def step(self, action: (int, int)) -> ((int, int), int):
         current_state = self.position
         next_state = self.get_next_state(current_state, action)
