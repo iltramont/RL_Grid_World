@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from grid_world_environment import GridWorldEnvironment
 from IPython.display import clear_output
+from time import sleep
+from tqdm import tqdm
 
 
 class MontecarloAgent:
@@ -9,13 +11,17 @@ class MontecarloAgent:
                  env: GridWorldEnvironment,
                  discount_factor: float = 1,
                  epsilon: float = 0.5,
-                 min_epsilon: float = 0.1):
+                 min_epsilon: float = 0.1,
+                 q_discount_factor: float = 0.5,
+                 max_iter: int = 10000):
 
         self.env = env
         self.discount_factor = discount_factor
         self.actions = self.env.actions    # Stay, up, down, left, right
         self.epsilon = epsilon    # Initial value for epsilon
         self.min_epsilon = min_epsilon    # Minimum value for epsilon
+        self.q_discount_factor = q_discount_factor
+        self.max_iter = max_iter
 
         # No need for a policy table, since actions are taken greedily from Q.
         self.q_value_table: np.ndarray = self.initialize_q_values()
@@ -28,8 +34,7 @@ class MontecarloAgent:
         return np.full(matrix_dimension, 0.0, dtype=float)
 
     def get_greedy_action(self, state: (int, int)) -> (int, int):
-        action_index: signedinteger = self.q_value_table[state].argmax()
-        return self.actions[action_index]
+        return self.actions[self.q_value_table[state].argmax()]
 
     def get_epsilon_greedy_action(self, state: (int, int)) -> (int, int):
         if np.random.rand() >= self.epsilon:
@@ -41,16 +46,64 @@ class MontecarloAgent:
     def generate_episode(self) -> list[tuple[any, any, any]]:
         trajectory = list()
         state: (int, int) = self.env.reset()    # Reset to initial position
+        k = 0
         while True:
+            k += 1
             action: (int, int) = self.get_epsilon_greedy_action(state)
             next_state, reward = self.env.step(action)
             trajectory.append((state, action, reward))
-            if next_state == self.env.target:
+            if next_state == self.env.target or k == self.max_iter:
                 break
             state = next_state
         return trajectory
 
-    def learn(self, episode: list) -> None:
+    def learn(self, episode):
+        """
+        Update Q-values based on the episode using a first-visit incremental approach.
+        :param episode: A list of (state, action, reward) tuples
+        """
+        visited_state_actions = set()  # To check if the state-action pair has been visited
+        rewards = [x[2] for x in episode]
+        G = 0  # Total return
+        # Process the episode in reverse to calculate returns efficiently
+        for i in reversed(range(len(episode))):
+            state, action, reward = episode[i]
+            action_idx = self.actions.index(action)
+            state_action = state + (action_idx,)
+
+            # Check for first visit to the state-action pair in the episode
+            if state_action not in visited_state_actions:
+                visited_state_actions.add(state_action)
+                G = self.discount_factor * G + reward  # Update return
+
+                # Incremental update of Q-values
+                # N(S, A): self.returns_count[state_action]
+                # Q(S, A): self.q_value_table[state_action]
+                # New estimate: Q(S, A) + (1 / N(S, A)) * (G - Q(S, A))
+
+                # Update counts for first-visit
+                if state_action not in self.returns:
+                    self.returns[state_action] = [G]  # Initialize if first visit in all episodes
+                    self.returns_count[state_action] = 1
+                else:
+                    self.returns_count[state_action] += 1  # Increment count
+                    self.returns[state_action].append(G)  # Keep for potential analysis
+
+                # Incremental update formula
+                alpha = 1.0 / self.returns_count[state_action]
+                self.q_value_table[state_action] += alpha * (G - self.q_value_table[state_action])
+
+    @staticmethod
+    def geom_alpha(x: float, k: int) -> float:
+        if k == 0:
+            return 1
+        if x == 1.0:
+            return 1 / k
+        else:
+            return (1 - x) / (x - x ** (k + 1))
+
+    # TODO
+    def _learn(self, episode: list) -> None:
         """
         Update Q-values based on the episode using a first-visit incremental approach.
         :param episode: A list of (state, action, reward) tuples
@@ -64,25 +117,33 @@ class MontecarloAgent:
             action_index: int = self.actions.index(action)
             state_action: (int, int, int) = state + (action_index, )
 
+            # Update return
+            g = self.discount_factor * g + reward
+
             # Check for first visit to the state-action pair in the episode
             if state_action not in visited_state_actions:
                 visited_state_actions.add(state_action)
-                # Update return
-                g = self.discount_factor * g + reward
+                '''# Update return
+                g = self.discount_factor * g + reward'''
 
-                if state_action not in self.returns:
-                    self.returns[state_action] = [g]
+                if state_action not in self.returns_count:
+                    #self.returns[state_action] = [g]
                     self.returns_count[state_action] = 1
                 else:
-                    self.returns[state_action].append(g)
+                    #self.returns[state_action].append(g)
                     self.returns_count[state_action] += 1
 
                 # Incremental update formula
-                self.q_value_table[state_action] += \
-                    (g - self.q_value_table[state_action]) / self.returns_count[state_action]
+                k = self.returns_count[state_action] - 1
+                x = self.q_discount_factor
+                self.q_value_table[state_action] = x * (
+                        (self.q_value_table[state_action] * MontecarloAgent.geom_alpha(x, k + 1)
+                         / MontecarloAgent.geom_alpha(x, k)) +
+                        (MontecarloAgent.geom_alpha(x, k + 1) * g)
+                )
 
     def train(self, n_episodes: int, plot: bool = False, plot_frequency: int = 50) -> None:
-        for episode in range(1, n_episodes + 1):
+        for episode in tqdm(range(1, n_episodes + 1)):
             self.epsilon = max(self.min_epsilon, 1 / episode)
 
             trajectory = self.generate_episode()
@@ -138,3 +199,25 @@ class MontecarloAgent:
                     plt.arrow(j, i, dx * 0.3, -dy * 0.3, color='blue', head_width=0.1, head_length=0.1,
                               zorder=5)  # Adjusted y coordinate and dy
         plt.show()
+
+    def animate_robot_movement(self, delay=0.5):
+        # Continue until the target is reached
+        while self.env.position != self.env.target:
+            # Display the current state of the environment
+            self.env.display()
+
+            # Get the best action for the current state
+            action = self.get_epsilon_greedy_action(self.env.position)
+
+            # Take a step in the environment
+            next_state, reward = self.env.step(action)
+
+            # Wait for a moment
+            sleep(delay)
+
+            # Clear the output
+            clear_output(wait=True)
+
+        # Display the final state
+        self.env.display()
+        print("Target reached!")
