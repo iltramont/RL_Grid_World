@@ -6,8 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="a9b84c43-5879-420c-bd3d-62a5c8766595" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dpAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/dpAgent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main_DPAgent.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/main_DPAgent.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_MontecarloAgent.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/main_MontecarloAgent.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/montecarloAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/montecarloAgent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/test.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,6 +92,7 @@
       <workItem from="1710718590301" duration="4005000" />
       <workItem from="1710722802498" duration="2316000" />
       <workItem from="1710757713408" duration="5412000" />
+      <workItem from="1710777076977" duration="4954000" />
     </task>
     <servers />
   </component>
@@ -98,8 +100,8 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/RL_Grid_World$montecarloAgent.coverage" NAME="montecarloAgent Coverage Results" MODIFIED="1710613804286" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RL_Grid_World$dpAgent.coverage" NAME="dpAgent Coverage Results" MODIFIED="1710762444757" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RL_Grid_World$montecarloAgent.coverage" NAME="montecarloAgent Coverage Results" MODIFIED="1710782327023" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RL_Grid_World$grid_world_environment.coverage" NAME="grid_world_environment Coverage Results" MODIFIED="1710595088087" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

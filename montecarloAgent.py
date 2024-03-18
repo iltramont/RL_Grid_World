@@ -12,8 +12,9 @@ class MontecarloAgent:
                  discount_factor: float = 1,
                  epsilon: float = 0.5,
                  min_epsilon: float = 0.1,
-                 q_discount_factor: float = 0.5,
-                 max_iter: int = 10000):
+                 alpha_epsilon: float = 2/3,
+                 # max_iter: int = 10000,
+                 q_discount_factor: float = 0.5):
 
         self.env = env
         self.discount_factor = discount_factor
@@ -21,7 +22,8 @@ class MontecarloAgent:
         self.epsilon = epsilon    # Initial value for epsilon
         self.min_epsilon = min_epsilon    # Minimum value for epsilon
         self.q_discount_factor = q_discount_factor
-        self.max_iter = max_iter
+        self.alpha_epsilon = alpha_epsilon
+        # self.max_iter = max_iter
 
         # No need for a policy table, since actions are taken greedily from Q.
         self.q_value_table: np.ndarray = self.initialize_q_values()
@@ -30,29 +32,38 @@ class MontecarloAgent:
         self.cumulative_returns = list()    # Store cumulative returns of each episode
 
     def initialize_q_values(self) -> np.ndarray:
+        """
+        Initializes q-value table. Table has shape (n_rows, n_columns, n_actions)
+        """
         matrix_dimension: (int, int, int) = self.env.size + (len(self.actions), )
         return np.full(matrix_dimension, 0.0, dtype=float)
 
     def get_greedy_action(self, state: (int, int)) -> (int, int):
+        """
+        Returns optimal action according to q-value table
+        """
         return self.actions[self.q_value_table[state].argmax()]
 
     def get_epsilon_greedy_action(self, state: (int, int)) -> (int, int):
+        """
+        Returns optimal action with probability 1 - epsilon. Returns random action with probability epsilon.
+        """
         if np.random.rand() >= self.epsilon:
             return self.get_greedy_action(state)
         else:
-            action_index: int = np.random.randint(0, len(self.actions))
-            return self.actions[action_index]
+            return self.actions[np.random.randint(0, len(self.actions))]
 
-    def generate_episode(self) -> list[tuple[any, any, any]]:
+    def generate_episode(self) -> list[tuple]:
+        """
+        Generates episode starting from initial position.
+        """
         trajectory = list()
         state: (int, int) = self.env.reset()    # Reset to initial position
-        k = 0
         while True:
-            k += 1
             action: (int, int) = self.get_epsilon_greedy_action(state)
             next_state, reward = self.env.step(action)
             trajectory.append((state, action, reward))
-            if next_state == self.env.target or k == self.max_iter:
+            if next_state == self.env.target:
                 break
             state = next_state
         return trajectory
@@ -142,9 +153,12 @@ class MontecarloAgent:
                         (MontecarloAgent.geom_alpha(x, k + 1) * g)
                 )
 
+    def compute_epsilon(self, episode: int) -> float:
+        return max(self.min_epsilon, 1 / episode ** self.alpha_epsilon)
+
     def train(self, n_episodes: int, plot: bool = False, plot_frequency: int = 50) -> None:
         for episode in tqdm(range(1, n_episodes + 1)):
-            self.epsilon = max(self.min_epsilon, 1 / episode)
+            self.epsilon = self.compute_epsilon(episode)
 
             trajectory = self.generate_episode()
             self.learn(trajectory)
@@ -200,14 +214,17 @@ class MontecarloAgent:
                               zorder=5)  # Adjusted y coordinate and dy
         plt.show()
 
-    def animate_robot_movement(self, delay=0.5):
+    def animate_robot_movement(self, delay: float = 0.5, only_greedy: bool = True):
         # Continue until the target is reached
         while self.env.position != self.env.target:
             # Display the current state of the environment
             self.env.display()
 
             # Get the best action for the current state
-            action = self.get_epsilon_greedy_action(self.env.position)
+            if only_greedy:
+                action = self.get_greedy_action(self.env.position)
+            else:
+                action = self.get_epsilon_greedy_action(self.env.position)
 
             # Take a step in the environment
             next_state, reward = self.env.step(action)
