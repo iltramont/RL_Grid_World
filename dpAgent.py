@@ -2,7 +2,7 @@ from typing import Any
 
 import numpy as np
 import matplotlib.pyplot as plt
-from time import sleep
+from time import sleep, perf_counter
 from IPython.display import clear_output
 from numpy import ndarray, dtype
 from grid_world_environment import GridWorldEnvironment
@@ -78,15 +78,49 @@ class DPAgent:
         return policy_stable
 
     def policy_iteration(self, theta: float):
+        t1 = perf_counter()
         self.initialize_values()
         self.initialize_policy()
         cont = 1
         while True:
-            print(f'Iteration {cont}...')
+            clear_output()
+            print(f'Iterations: {cont}.', end="\t")
             self.policy_eval(theta)
             if self.policy_improvement():
                 break
             cont += 1
+        t2 = perf_counter()
+        print(f'Elapsed time: {t2 - t1:.2f} seconds.')
+        return self.policy_table
+
+    def value_iteration(self, theta: float):
+        t1 = perf_counter()
+        self.initialize_values()
+        self.initialize_policy()
+        counter = 1
+        while True:
+            clear_output()
+            print(f'Iterations: {counter}.', end="\t")
+            counter += 1
+            delta = 0
+            for state in self.env.states:
+                v = self.value_table[state]    # v <- V(s)
+
+                # Update V(s)
+                possible_new_values: list[float] = []
+                for action in self.actions:
+                    next_state = self.env.get_next_state(state, action)
+                    reward = self.env.get_reward(state, action, next_state)
+                    possible_new_values.append(reward + self.discount_factor * self.value_table[next_state])
+                self.value_table[state] = max(possible_new_values)    # Updated
+                # Update policy table
+                self.policy_table[state] = np.eye(5)[np.argmax(possible_new_values)]
+
+                delta = max(delta, np.abs(v - self.value_table[state]))
+            if delta < theta:
+                break
+        t2 = perf_counter()
+        print(f"Elapsed time: {t2 - t1:.2f} seconds.")
         return self.policy_table
 
     def plot_value_table(self):
