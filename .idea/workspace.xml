@@ -5,7 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a9b84c43-5879-420c-bd3d-62a5c8766595" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sarsaAgent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/practical5_temporal_difference_learning.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/practical5_temporal_difference_learning.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,8 +16,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="Jupyter Notebook" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -92,6 +93,7 @@
       <workItem from="1710777076977" duration="4954000" />
       <workItem from="1710852414881" duration="37000" />
       <workItem from="1710852802135" duration="48000" />
+      <workItem from="1710857756405" duration="936000" />
     </task>
     <servers />
   </component>
