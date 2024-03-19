@@ -6,9 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="a9b84c43-5879-420c-bd3d-62a5c8766595" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main_MontecarloAgent.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/main_MontecarloAgent.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/montecarloAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/montecarloAgent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/test.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,6 +90,8 @@
       <workItem from="1710722802498" duration="2316000" />
       <workItem from="1710757713408" duration="5412000" />
       <workItem from="1710777076977" duration="4954000" />
+      <workItem from="1710852414881" duration="37000" />
+      <workItem from="1710852802135" duration="48000" />
     </task>
     <servers />
   </component>
