@@ -6,10 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="a9b84c43-5879-420c-bd3d-62a5c8766595" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main_MontecarloAgent.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/main_MontecarloAgent.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/practical5_temporal_difference_learning.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/practical5_temporal_difference_learning.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_SarsaAgent.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/main_SarsaAgent.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sarsaAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/sarsaAgent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/test.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,6 +42,7 @@
     "Python.dpAgent.executor": "Run",
     "Python.grid_world_environment.executor": "Run",
     "Python.montecarloAgent.executor": "Run",
+    "Python.qAgent.executor": "Run",
     "Python.sarsaAgent.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -100,6 +99,7 @@
       <workItem from="1710857756405" duration="936000" />
       <workItem from="1710858740235" duration="2367000" />
       <workItem from="1710862598085" duration="4924000" />
+      <workItem from="1710941182004" duration="6033000" />
     </task>
     <servers />
   </component>
@@ -110,6 +110,7 @@
     <SUITE FILE_PATH="coverage/RL_Grid_World$dpAgent.coverage" NAME="dpAgent Coverage Results" MODIFIED="1710762444757" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RL_Grid_World$montecarloAgent.coverage" NAME="montecarloAgent Coverage Results" MODIFIED="1710782327023" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RL_Grid_World$grid_world_environment.coverage" NAME="grid_world_environment Coverage Results" MODIFIED="1710595088087" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/RL_Grid_World$sarsaAgent.coverage" NAME="sarsaAgent Coverage Results" MODIFIED="1710867065592" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RL_Grid_World$sarsaAgent.coverage" NAME="sarsaAgent Coverage Results" MODIFIED="1710944071946" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RL_Grid_World$qAgent.coverage" NAME="qAgent Coverage Results" MODIFIED="1710947681571" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

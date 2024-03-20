@@ -154,13 +154,14 @@ class SarsaAgent:
         plt.show()
 
     def update_plot(self, last_episodes_to_plot: int):
+        colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
         plt.figure(figsize=(21, 9))
         x: list[int] = [i for i in range(1, len(self.cumulative_returns) + 1)][-last_episodes_to_plot:]
         y: list[float] = self.cumulative_returns[-last_episodes_to_plot:]
         mean_return: float = np.mean(y)
-        plt.plot(x, y, label='Cumulative Return', color="blue")
+        plt.plot(x, y, label='Cumulative Return', color=colors[0])
         plt.axhline(mean_return,
-                    label=f'Mean Return last {last_episodes_to_plot} episodes = {mean_return:.2f}', color='red')
+                    label=f'Mean Return last {last_episodes_to_plot} episodes = {mean_return:.2f}', color=colors[1])
         plt.xlabel('Episodes')
         plt.ylabel('Cumulative Return')
         plt.title('Cumulative Return per Episode')
