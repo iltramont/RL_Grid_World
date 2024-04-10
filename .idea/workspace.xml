@@ -6,8 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="a9b84c43-5879-420c-bd3d-62a5c8766595" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main_SarsaAgent.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/main_SarsaAgent.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sarsaAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/sarsaAgent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_QLearningAgent.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/main_QLearningAgent.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,6 +100,9 @@
       <workItem from="1710862598085" duration="4924000" />
       <workItem from="1710941182004" duration="6033000" />
       <workItem from="1710951894328" duration="8000" />
+      <workItem from="1711032202393" duration="392000" />
+      <workItem from="1711115299556" duration="9000" />
+      <workItem from="1711660499908" duration="178000" />
     </task>
     <servers />
   </component>
