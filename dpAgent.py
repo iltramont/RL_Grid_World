@@ -37,7 +37,7 @@ class DPAgent:
             policy[state] = np.ones(len(self.actions)) / len(self.actions)
         return policy
 
-    def get_optimal_action(self, state) -> (int, int):
+    def get_optimal_action(self, state) -> tuple[(int, int)]:
         return self.actions[np.argmax(self.policy_table[state])]
 
     def policy_eval(self, theta=0.001):
@@ -74,7 +74,7 @@ class DPAgent:
             if chosen_action != best_action:
                 policy_stable = False
 
-            self.policy_table[state] = np.eye(5)[self.actions.index(best_action)]
+            self.policy_table[state] = np.eye(len(self.actions))[self.actions.index(best_action)]
         return policy_stable
 
     def policy_iteration(self, theta: float):
@@ -114,7 +114,7 @@ class DPAgent:
                     possible_new_values.append(reward + self.discount_factor * self.value_table[next_state])
                 self.value_table[state] = max(possible_new_values)    # Updated
                 # Update policy table
-                self.policy_table[state] = np.eye(5)[np.argmax(possible_new_values)]
+                self.policy_table[state] = np.eye(len(self.actions))[np.argmax(possible_new_values)]
 
                 delta = max(delta, np.abs(v - self.value_table[state]))
             if delta < theta:
@@ -125,7 +125,7 @@ class DPAgent:
 
     def plot_value_table(self):
         # Plot Optimal Value Function and Optimal Policy
-        value_table_processed = np.nan_to_num(self.value_table, nan=5 * min(self.value_table[0]))
+        value_table_processed = np.nan_to_num(self.value_table, nan=len(self.actions) * min(self.value_table[0]))
         plt.imshow(value_table_processed, cmap='hot', interpolation='nearest', vmin=2 * min(self.value_table[0]))
         plt.colorbar()
         plt.title('Heatmap of Gridworld State Values')
@@ -143,14 +143,14 @@ class DPAgent:
                 best_action = self.get_optimal_action((i, j))
                 if best_action == (0, 0):
                     # Stay action, plot a circle
-                    circle = plt.Circle((j, i), 0.1, color='blue', zorder=5)  # Adjusted y coordinate
+                    circle = plt.Circle((j, i), 0.1, color='blue', zorder=len(self.actions))  # Adjusted y coordinate
                     ax.add_patch(circle)
                 else:
                     # Plot an arrow for the action
                     dx, dy = best_action[1], -best_action[0]  # Adjust direction for matrix coordinate system
                     # Flip the dy value to correct the orientation
                     plt.arrow(j, i, dx * 0.3, -dy * 0.3, color='blue', head_width=0.1, head_length=0.1,
-                              zorder=5)  # Adjusted y coordinate and dy
+                              zorder=len(self.actions))  # Adjusted y coordinate and dy
         plt.show()
 
     def animate_robot_movement(self, delay=0.5):

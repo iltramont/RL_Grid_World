@@ -2,15 +2,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+ACTIONS = ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1))  # stay, down, up, right, left
+REWARDS = (0, -5, -1)  # target, obstacle, empty cell
+
 class ValidStateException(Exception):
     pass
 
 
 class GridWorldEnvironment:
-    def __init__(self, size: (int, int), obstacles: tuple[(int, int)], position: (int, int), target: (int, int),
-                 actions: tuple[(int, int)] = ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)),
-                 rewards: tuple[int] = (0, -5, -1),
-                 malfunction_probability: float = 0.0):
+    def __init__(self,
+                 size:      tuple[(int, int)],
+                 obstacles: tuple[(int, int)],
+                 position:  tuple[(int, int)],
+                 target:    tuple[(int, int)],
+                 actions:   tuple[(int, int)] = ACTIONS,
+                 rewards:   tuple[int] = REWARDS,
+                 malfunction_probability: float = 0.0,
+                 seed: int | None = 25):
         """
         Defines a grid-world environment.
         :param malfunction_probability:
@@ -29,69 +37,71 @@ class GridWorldEnvironment:
         self.actions = actions
         self.rewards = rewards
         self.malfunction_probability = malfunction_probability
-
         if self.is_valid_state(position):
             self.initial_position = position  # for reset
             self.position = position
         else:
-            raise ValidStateException
+            raise ValidStateException(f"Posizione iniziale {position} non valida")
+        self.rng = np.random.default_rng(seed)  # Random number generator for reproducibility
 
-    def is_valid_state(self, state: (int, int)) -> bool:
-        """
-        Used to verify if a state is an obstacle or is out of bound.
-        """
+    def is_valid_state(self, state: tuple[(int, int)]) -> bool:
+        # Used to verify if a state is an obstacle or is out of bound.
         return state in self.states
 
-    def get_reward(self, current_state, action, next_state) -> int:
-        if current_state == self.target:
+    def get_reward(self,
+                   current_state: tuple[(int, int)],
+                   action:        tuple[(int, int)],
+                   next_state:    tuple[(int, int)]) -> int:
+        if current_state == self.target:                        # Target reached
             return self.rewards[0]
-        elif current_state == next_state and action != (0, 0):
+        elif current_state == next_state and action != (0, 0):  # Obstacle hit or out of bounds
             return self.rewards[1]
-        else:
+        else:                                                   # Valid move to an empty cell
             return self.rewards[2]
 
     @staticmethod
-    def rotate_action(action: (int, int), clockwise: bool) -> (int, int):
-        """
-        Used for malfunctioning actuators
-        """
+    def rotate_action(action: tuple[(int, int)], clockwise: bool) -> tuple[(int, int)]:
+        # 90 degree rotation used for malfunctioning actuators.
         if clockwise:
             return action[1], -action[0]
         else:
             return -action[1], action[0]
 
-    @staticmethod
-    def malfunction_action(action_input: (int, int)) -> (int, int):
+    def malfunction_action(self, action_input: tuple[(int, int)]) -> tuple[(int, int)]:
         if action_input == (0, 0):
             # action_index: int = np.random.choice((1, 2, 3, 4))
             # return self.actions[action_index]
             return action_input
         else:
-            clockwise: bool = np.random.randint(0, 2) == 0
+            clockwise: bool = self.rng.integers(2) == 0
             return GridWorldEnvironment.rotate_action(action_input, clockwise)
 
-    # this should be modified if we introduce malfunctioning actuator
-    def get_next_state(self, current_state: (int, int), action: (int, int)) -> (int, int):
-
-        malfunction: bool = np.random.random() < self.malfunction_probability
-        if malfunction:
-            action = GridWorldEnvironment.malfunction_action(action)
-
-        possible_next_state = (current_state[0] + action[0], current_state[1] + action[1])
+    def add_tuples(self, x: tuple[(int, int)], y: tuple[(int, int)]):
+        return x[0] + y[0], x[1] + y[1]
+    
+    def get_next_state(self,
+                       current_state: tuple[(int, int)],
+                       action:        tuple[(int, int)]) -> tuple[(int, int)]:
+        if self.malfunction_probability > 0:
+            malfunction: bool = self.rng.random() < self.malfunction_probability
+            if malfunction:
+                action = self.malfunction_action(action)
+                
+        possible_next_state = self.add_tuples(current_state, action)
         if self.is_valid_state(possible_next_state) and current_state != self.target:
             next_state = possible_next_state
         else:
             next_state = current_state
         return next_state
 
-    def step(self, action: (int, int)) -> ((int, int), int):
+    def step(self, action: tuple[(int, int)]) -> tuple[(tuple[(int, int)], int)]:
         current_state = self.position
         next_state = self.get_next_state(current_state, action)
         reward = self.get_reward(current_state, action, next_state)
         self.position = next_state
         return next_state, reward
 
-    def reset(self) -> (int, int):
+    def reset(self) -> tuple[(int, int)]:
         self.position = self.initial_position
         return self.position
 

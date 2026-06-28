@@ -14,7 +14,8 @@ class MontecarloAgent:
                  min_epsilon: float = 0.1,
                  alpha_epsilon: float = 2/3,
                  # max_iter: int = 10000,
-                 q_discount_factor: float = 0.5):
+                 q_discount_factor: float = 0.5,
+                 seed: int | None = 25):
 
         self.env = env
         self.discount_factor = discount_factor
@@ -30,37 +31,39 @@ class MontecarloAgent:
         self.returns: dict[(int, int, int), list[int]] = dict()    # Stores the returns of each state-action pair
         self.returns_count: dict[(int, int, int), int] = dict()    # Counts the occurrence of each state-action pair
         self.cumulative_returns = list()    # Store cumulative returns of each episode
+        self.rng = np.random.default_rng(seed)  # Random number generator for reproducibility
 
     def initialize_q_values(self) -> np.ndarray:
-        """
-        Initializes q-value table. Table has shape (n_rows, n_columns, n_actions)
-        """
-        matrix_dimension: (int, int, int) = self.env.size + (len(self.actions), )
+        # Initializes q-value table. Table has shape (n_rows, n_columns, n_actions).
+        matrix_dimension: tuple[int, int, int] = self.env.size + (len(self.actions), )
         return np.full(matrix_dimension, 0.0, dtype=float)
 
-    def get_greedy_action(self, state: (int, int)) -> (int, int):
-        """
-        Returns optimal action according to q-value table
-        """
+
+    def get_greedy_action(self, state: tuple[int, int]) -> tuple[int, int]:
+        # Returns optimal action according to q-value table
         return self.actions[self.q_value_table[state].argmax()]
 
-    def get_epsilon_greedy_action(self, state: (int, int)) -> (int, int):
+
+    def get_epsilon_greedy_action(self, state: tuple[int, int]) -> tuple[int, int]:
         """
-        Returns optimal action with probability 1 - epsilon. Returns random action with probability epsilon.
+        Returns optimal action with probability 1 - epsilon.
+        Returns random action with probability epsilon.
         """
-        if np.random.rand() >= self.epsilon:
+        if self.rng.random() >= self.epsilon:
             return self.get_greedy_action(state)
         else:
-            return self.actions[np.random.randint(0, len(self.actions))]
+            return self.actions[self.rng.integers(len(self.actions))]
 
-    def generate_episode(self) -> list[tuple]:
+    def generate_episode(self) -> list[tuple[int, int, int]]:
         """
         Generates episode starting from initial position.
+        The target state must be reached to terminate the episode.
+        :return: A list of (state, action, reward) tuples.
         """
         trajectory = list()
-        state: (int, int) = self.env.reset()    # Reset to initial position
+        state: tuple[int, int] = self.env.reset()    # Reset to initial position
         while True:
-            action: (int, int) = self.get_epsilon_greedy_action(state)
+            action = self.get_epsilon_greedy_action(state)
             next_state, reward = self.env.step(action)
             trajectory.append((state, action, reward))
             if next_state == self.env.target:
@@ -85,7 +88,7 @@ class MontecarloAgent:
             # Check for first visit to the state-action pair in the episode
             if state_action not in visited_state_actions:
                 visited_state_actions.add(state_action)
-                G = self.discount_factor * G + reward  # Update return
+                G = reward + self.discount_factor * G  # Update return
 
                 # Incremental update of Q-values
                 # N(S, A): self.returns_count[state_action]
@@ -126,7 +129,7 @@ class MontecarloAgent:
         for i in reversed(range(len(episode))):
             state, action, reward = episode[i]
             action_index: int = self.actions.index(action)
-            state_action: (int, int, int) = state + (action_index, )
+            state_action: tuple[(int, int, int)] = state + (action_index, )
 
             # Update return
             g = self.discount_factor * g + reward
