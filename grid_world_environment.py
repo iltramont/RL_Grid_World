@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 ACTIONS = ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1))  # stay, down, up, right, left
-REWARDS = (0, -5, -1)  # target, obstacle, empty cell
+REWARDS = (10, -5, -1)  # target, obstacle, empty cell
 
 class ValidStateException(Exception):
     pass
@@ -47,17 +47,19 @@ class GridWorldEnvironment:
     def is_valid_state(self, state: tuple[(int, int)]) -> bool:
         # Used to verify if a state is an obstacle or is out of bound.
         return state in self.states
-
+        
+    
     def get_reward(self,
-                   current_state: tuple[(int, int)],
-                   action:        tuple[(int, int)],
-                   next_state:    tuple[(int, int)]) -> int:
-        if current_state == self.target:                        # Target reached
+                current_state: tuple[(int, int)],
+                action:        tuple[(int, int)],
+                next_state:    tuple[(int, int)]) -> int:
+        if next_state == self.target:                           # Target reached
             return self.rewards[0]
         elif current_state == next_state and action != (0, 0):  # Obstacle hit or out of bounds
             return self.rewards[1]
         else:                                                   # Valid move to an empty cell
             return self.rewards[2]
+    
 
     @staticmethod
     def rotate_action(action: tuple[(int, int)], clockwise: bool) -> tuple[(int, int)]:

@@ -13,8 +13,8 @@ class MontecarloAgent:
                  epsilon: float = 0.5,
                  min_epsilon: float = 0.1,
                  alpha_epsilon: float = 2/3,
-                 # max_iter: int = 10000,
-                 q_discount_factor: float = 0.5,
+                 max_iter: int = 500,
+                 q_discount_factor: float = 0.0,
                  seed: int | None = 25):
 
         self.env = env
@@ -24,7 +24,7 @@ class MontecarloAgent:
         self.min_epsilon = min_epsilon    # Minimum value for epsilon
         self.q_discount_factor = q_discount_factor
         self.alpha_epsilon = alpha_epsilon
-        # self.max_iter = max_iter
+        self.max_iter = max_iter
 
         # No need for a policy table, since actions are taken greedily from Q.
         self.q_value_table: np.ndarray = self.initialize_q_values()
@@ -54,7 +54,7 @@ class MontecarloAgent:
         else:
             return self.actions[self.rng.integers(len(self.actions))]
 
-    def generate_episode(self) -> list[tuple[int, int, int]]:
+    def generate_episode(self) -> list[tuple[tuple[int, int], tuple[int, int], int]]:
         """
         Generates episode starting from initial position.
         The target state must be reached to terminate the episode.
@@ -62,51 +62,51 @@ class MontecarloAgent:
         """
         trajectory = list()
         state: tuple[int, int] = self.env.reset()    # Reset to initial position
+        xx = 0
         while True:
+            xx += 1
             action = self.get_epsilon_greedy_action(state)
             next_state, reward = self.env.step(action)
             trajectory.append((state, action, reward))
             if next_state == self.env.target:
                 break
             state = next_state
+            if xx >= self.max_iter:
+                break
         return trajectory
 
     def learn(self, episode):
         """
-        Update Q-values based on the episode using a first-visit incremental approach.
+        Update Q-values based on the episode using a last-visit incremental approach.
         :param episode: A list of (state, action, reward) tuples
         """
-        visited_state_actions = set()  # To check if the state-action pair has been visited
-        rewards = [x[2] for x in episode]
+        visited_state_actions = set()  # coppie già aggiornate in questo episodio
+
         G = 0  # Total return
         # Process the episode in reverse to calculate returns efficiently
         for i in reversed(range(len(episode))):
             state, action, reward = episode[i]
             action_idx = self.actions.index(action)
             state_action = state + (action_idx,)
+            G = reward + self.discount_factor * G  # Update return (sempre, fuori dal filtro)
 
-            # Check for first visit to the state-action pair in the episode
+            # Prima volta che la incontro andando a ritroso = ultima visita cronologica
             if state_action not in visited_state_actions:
                 visited_state_actions.add(state_action)
-                G = reward + self.discount_factor * G  # Update return
 
-                # Incremental update of Q-values
-                # N(S, A): self.returns_count[state_action]
-                # Q(S, A): self.q_value_table[state_action]
-                # New estimate: Q(S, A) + (1 / N(S, A)) * (G - Q(S, A))
-
-                # Update counts for first-visit
+                # Update count
                 if state_action not in self.returns:
-                    self.returns[state_action] = [G]  # Initialize if first visit in all episodes
+                    self.returns[state_action] = [G]
                     self.returns_count[state_action] = 1
                 else:
-                    self.returns_count[state_action] += 1  # Increment count
-                    self.returns[state_action].append(G)  # Keep for potential analysis
+                    self.returns_count[state_action] += 1
+                    self.returns[state_action].append(G)
 
                 # Incremental update formula
-                alpha = 1.0 / self.returns_count[state_action]
+                alpha = max(self.q_discount_factor, 1.0 / self.returns_count[state_action])
                 self.q_value_table[state_action] += alpha * (G - self.q_value_table[state_action])
-
+                
+            
     @staticmethod
     def geom_alpha(x: float, k: int) -> float:
         if k == 0:
@@ -116,61 +116,30 @@ class MontecarloAgent:
         else:
             return (1 - x) / (x - x ** (k + 1))
 
-    # TODO
-    def _learn(self, episode: list) -> None:
-        """
-        Update Q-values based on the episode using a first-visit incremental approach.
-        :param episode: A list of (state, action, reward) tuples
-        """
-        visited_state_actions = set()
-        # rewards: list[int] = [x[2] for x in episode]
-        g = 0    # Total return
-        # Process the episode in reverse to calculate returns efficiently
-        for i in reversed(range(len(episode))):
-            state, action, reward = episode[i]
-            action_index: int = self.actions.index(action)
-            state_action: tuple[(int, int, int)] = state + (action_index, )
-
-            # Update return
-            g = self.discount_factor * g + reward
-
-            # Check for first visit to the state-action pair in the episode
-            if state_action not in visited_state_actions:
-                visited_state_actions.add(state_action)
-                '''# Update return
-                g = self.discount_factor * g + reward'''
-
-                if state_action not in self.returns_count:
-                    #self.returns[state_action] = [g]
-                    self.returns_count[state_action] = 1
-                else:
-                    #self.returns[state_action].append(g)
-                    self.returns_count[state_action] += 1
-
-                # Incremental update formula
-                k = self.returns_count[state_action] - 1
-                x = self.q_discount_factor
-                self.q_value_table[state_action] = x * (
-                        (self.q_value_table[state_action] * MontecarloAgent.geom_alpha(x, k + 1)
-                         / MontecarloAgent.geom_alpha(x, k)) +
-                        (MontecarloAgent.geom_alpha(x, k + 1) * g)
-                )
-
+    
     def compute_epsilon(self, episode: int) -> float:
-        return max(self.min_epsilon, 1 / episode ** self.alpha_epsilon)
+        return max(self.min_epsilon, 1 / (episode ** self.alpha_epsilon))
+
 
     def train(self, n_episodes: int, plot: bool = False, plot_frequency: int = 50) -> None:
         for episode in tqdm(range(1, n_episodes + 1)):
             self.epsilon = self.compute_epsilon(episode)
 
-            trajectory = self.generate_episode()
+            #trajectory = self.generate_episode()
+            while True:
+                trajectory = self.generate_episode()
+                if len(trajectory) <= self.max_iter:
+                    break
+            
             self.learn(trajectory)
 
             self.cumulative_returns.append(sum([t[2] for t in trajectory]))
             self.update_plot(episode, plot, plot_frequency)
 
+
     def get_value_table(self) -> np.ndarray:
         return np.max(self.q_value_table, axis=2)
+
 
     def update_plot(self, episode, plot: bool, plot_frequency: int = 50):
         if plot and episode % plot_frequency == 0:
@@ -187,10 +156,19 @@ class MontecarloAgent:
             plt.close()
 
     def plot_value_table(self):
-        value_table = self.get_value_table()
+        value_table = self.get_value_table().astype(float)
+        # Set black for obstacles
+        for obs in self.env.obstacles:
+            value_table[obs] = np.nan
+               
+        cmap = plt.cm.hot.copy()
+        cmap.set_bad(color='black')       
+            
+        vmin = np.nanmin(value_table)    
+               
         # Plot Optimal Value Function and Optimal Policy
-        value_table_processed = np.nan_to_num(value_table, nan=5 * min(value_table[0]))
-        plt.imshow(value_table_processed, cmap='hot', interpolation='nearest', vmin=2 * min(value_table[0]))
+        #value_table_processed = np.nan_to_num(value_table, nan=5 * min(value_table[0]))
+        plt.imshow(value_table, cmap=cmap, interpolation='nearest', vmin=vmin)
         plt.colorbar()
         plt.title('Heatmap of Gridworld State Values')
         plt.xlabel('X-coordinate')
